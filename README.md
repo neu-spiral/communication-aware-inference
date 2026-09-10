@@ -29,6 +29,18 @@ GPU outside Jetson.
 
 ```bibtex
 @inproceedings{communication_aware_inference_2026,
+  author    = {Peyman Gholami and
+               Theodoros-Thirimachos Davarakis and
+               Teng Li and
+               Miquel {Sirera Perelló} and
+               Salil Reddy and
+               Ayberk Yarkın Yıldız and
+               Anish Arora and
+               Atilla Eryilmaz and
+               Stratis Ioannidis and
+               Chengzhang Li and
+               Hulya Seferoglu and
+               Ness Shroff},
   title     = {Communication-Aware Model Distributed Inference via
                Latent Representation Compression},
   booktitle = {Proceedings of ACM MobiHoc},
