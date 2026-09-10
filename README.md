@@ -22,9 +22,7 @@ Given edge nodes, pipelined inference tasks, and time-varying link capacities, t
 
 ## Acknowledgements
 
-Developed in the SPIRAL group at Northeastern University. The ResNet-56
-checkpoint and the Jetson timing traces under `assets/` were contributed by
-Teng.
+TO DO
 
 ## License
 
