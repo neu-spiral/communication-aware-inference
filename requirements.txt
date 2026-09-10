@@ -1,0 +1,15 @@
+numpy
+scipy
+scikit-learn
+matplotlib
+torch
+torchvision
+
+# Optional LLM backend (see README_LLM.md)
+transformers>=4.41.2
+datasets>=2.19.2
+# The corpus/MMLU loaders read Hub parquet directly, because the pinned
+# datasets/fsspec pair cannot resolve the Hub's glob patterns.
+pandas
+huggingface_hub
+accelerate>=0.30.1

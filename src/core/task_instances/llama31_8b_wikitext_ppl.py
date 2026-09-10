@@ -1,0 +1,41 @@
+"""
+Llama-3.1-8B on WikiText-2, scored by bounded perplexity ratio.
+
+Paper scenario ``Ll3-8B-WT``. See :mod:`src.core.task_instances._llm_base` for
+the shared pipeline, what ``eta`` means, and the env overrides.
+"""
+
+from __future__ import annotations
+
+from typing import Optional
+
+from ._llm_base import LLMTaskSpec, make_llm_task, setup_llm_task
+from ..task import InferenceTask
+
+SPEC = LLMTaskSpec(
+    name="llama31_8b_wikitext_ppl",
+    model_name="meta-llama/Llama-3.1-8B",
+    metric="perplexity",
+    corpus="wikitext",
+    n_stages=5,
+    eta_min=0.1,
+    fast_samples=32,
+    true_samples=128,
+    max_length=512,
+    batch_size=1,
+)
+
+
+def setup_model_and_callables(*, compressor_name: Optional[str] = None):
+    return setup_llm_task(SPEC, compressor_name=compressor_name)
+
+
+def make_task(
+    task_id: int,
+    api,
+    w_k: float = 1.0,
+    R_k: float = 10.0,
+    compressor_name: Optional[str] = None,
+) -> InferenceTask:
+    return make_llm_task(task_id=task_id, api=api, w_k=w_k, R_k=R_k,
+                         compressor_name=compressor_name)

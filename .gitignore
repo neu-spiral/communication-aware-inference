@@ -1,0 +1,37 @@
+# Data, outputs, environments
+data/*
+outputs*/
+logs/
+.ipynb_checkpoints/
+.venv/
+.pytest_cache/
+
+# Local-only experiment / Phase-1 artifacts (kept on disk, not published)
+main.py
+run_phase1_resnet_compare.py
+measure_delta_gamma_assumptions.py
+visualize_r_sweep_tradeoff_excess_delay copy.py
+compare_to_baselines copy.py
+README_PHASE1_RESNET.md
+
+# Caches and OS junk
+**/__pycache__/
+*.pyc
+*.pyo
+.pycache/
+.DS_Store
+**/.DS_Store
+
+# Local scratch in a working checkout: ad-hoc result dirs, ray dumps, archives
+# and paper drafts. Leading slashes keep experiments/concavity/figures tracked.
+/figures/
+/resnet_topk/
+/resnet_quant/
+/resnet_llmint8/
+/flant5_sst2_concavity_test/
+/google__*
+*.zip
+*_response.md
+*_response.tex
+*_response.txt
+*.scratch-*.md

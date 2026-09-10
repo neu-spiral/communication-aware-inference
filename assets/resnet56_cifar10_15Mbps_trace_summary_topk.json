@@ -1,0 +1,78 @@
+{
+  "scenario_name": "resnet_no_compression_trace",
+  "experiment_idx": 0,
+  "output_dir": "scenario_trace_outputs/resnet_no_compression_trace_bs100_15Mbps_A_20260408_055505",
+  "codec_name": "topk",
+  "num_samples": 100,
+  "expected_samples": 100,
+  "wall_sec": 429.3219851590693,
+  "reference_rate_hz_from_median_delay": 0.07847837483000637,
+  "median_total_delay_sec": 12.742363767931238,
+  "avg_total_delay_sec": 12.537570036328397,
+  "median_tau_residence_node_sec": [
+    0.013744598720222712,
+    0.01243504649028182,
+    0.013163706520572305,
+    0.012016871245577931
+  ],
+  "avg_tau_residence_node_sec": [
+    0.01588223237078637,
+    0.012601143447682261,
+    0.013201782954856753,
+    0.0149302400322631
+  ],
+  "median_tau_compute_node_sec": [
+    0.010589158860966563,
+    0.00960599142126739,
+    0.011260934406891465,
+    0.011232641758397222
+  ],
+  "avg_tau_compute_node_sec": [
+    0.012769173658452928,
+    0.009594674138352275,
+    0.011187219796702265,
+    0.014114447203464806
+  ],
+  "median_tau_codec_node_sec": [
+    0.11542105884291232,
+    0.058795040007680655,
+    0.03356464533135295,
+    0.015250175027176738
+  ],
+  "avg_tau_codec_node_sec": [
+    0.11691838121041656,
+    0.05768788651097566,
+    0.03349186634179205,
+    0.01822576092556119
+  ],
+  "median_tau_residence_codec_node_sec": [
+    0.11855173064395785,
+    0.061636019265279174,
+    0.03546739695593715,
+    0.016049092169851065
+  ],
+  "avg_tau_residence_codec_node_sec": [
+    0.12003143992274999,
+    0.06069435582030565,
+    0.035506429499946535,
+    0.019041553754359484
+  ],
+  "median_channel_true_bps": [
+    1723367.9691973357,
+    1716300.38141386,
+    1575449.1131565403
+  ],
+  "avg_channel_true_bps": [
+    1720318.0101173788,
+    1683082.9775741326,
+    1480749.3893125707
+  ],
+  "simulated_codec_overhead_profile": {
+    "codec_name": "topk",
+    "compressor_name": "topk",
+    "compression_param": 0.5,
+    "used_for": "simulated_codec_overhead_only",
+    "affects_actual_transport": false,
+    "actual_transport_compressor": "identity"
+  }
+}
