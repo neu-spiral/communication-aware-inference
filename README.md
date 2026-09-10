@@ -9,6 +9,22 @@ Offline simulation code accompanying:
 
 Given edge nodes, pipelined inference tasks, and time-varying link capacities, the code chooses per-link compression ratios \(\eta\) to maximize accuracy subject to long-term throughput / delay QoS. It includes CSI-aware optima and CSI-oblivious stochastic dual descent, plus baselines.
 
+## Companion repositories
+
+This repository is the **offline** half of the paper: the optimizer library and
+the simulation harness. The online experiments run on real edge hardware, and
+each testbed has its own repository:
+
+| Testbed | Repository | Scope |
+|---|---|---|
+| PRESCIENT (Ohio State) | [`PRESCIENT-osu/DNN-comm-compression`](https://github.com/PRESCIENT-osu/DNN-comm-compression) | Pipelined distributed inference over a programmable wide-area network, with configurable per-link bandwidth, delay, and loss. |
+| Jetson | not yet public | Four-node Jetson deployment, plus the accuracy-function fitting and trace-collection code behind `assets/`. |
+
+The Jetson repository is where the fitted accuracy models and measured traces
+bundled in [`assets/`](assets/README.md) come from, and it documents how to
+regenerate them; its fitting workflow is platform-independent and runs on CPU or
+GPU outside Jetson.
+
 ## Citation
 
 ```bibtex
@@ -105,7 +121,7 @@ src/core/task_instances/  # Plug-in task families
 src/optimizers/           # CSI / no-CSI optimizers, estimators, baselines
 profile_llm_stages.py     # Measures per-stage tau and per-link a for an LLM task
 assets/                   # ResNet checkpoint, traces, fitting models,
-                          #   llm_stage_profiles.json
+                          #   llm_stage_profiles.json (see assets/README.md)
 experiments/concavity/    # Concavity study: is utility concave in eta?
 tests/                    # CPU/GPU codec equivalence
 ```
@@ -136,8 +152,9 @@ Shared codecs live in `src/core/compressors.py`.
 | `flant5_sst2_{topk,quantization,llmint8}` | Flan-T5-base / SST-2, accuracy (`--M 4`) |
 
 ResNet defaults load from `assets/` (checkpoint, 15 Mbps scenario trace, and
-optional poly3 fitting models). Override paths with environment variables if
-needed:
+optional poly3 fitting models); [`assets/README.md`](assets/README.md) describes
+what each file holds and how it was produced. Override paths with environment
+variables if needed:
 
 ```bash
 # defaults already point at assets/; CIFAR-10 downloads under ./data

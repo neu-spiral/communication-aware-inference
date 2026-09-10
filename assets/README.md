@@ -8,7 +8,9 @@ Compression (MobiHoc 2026)**.
 **For fitting and trace-generation code, configuration, and reproduction
 instructions, please refer to our companion GitHub repository for Jetson online
 experiments.** Its fitting workflow is platform-independent and can be used in
-CPU or GPU environments beyond Jetson.
+CPU or GPU environments beyond Jetson. See
+[Companion repositories](../README.md#companion-repositories) for where the
+per-testbed repositories live.
 
 ## Files and their roles
 
