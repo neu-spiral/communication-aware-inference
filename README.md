@@ -17,44 +17,19 @@ each testbed has its own repository:
 
 | Testbed | Repository | Scope |
 |---|---|---|
+| Jetson | [`UIC-Networking-Research-Lab/CAMDI_RC_MobiHoc2026_Fitting_and_Jetson`](https://github.com/UIC-Networking-Research-Lab/CAMDI_RC_MobiHoc2026_Fitting_and_Jetson) | Four-node Jetson deployment, plus the accuracy-function fitting and trace-collection code behind `assets/`. |
+| Raspberry Pi | [`neu-spiral/rasp_compression`](https://github.com/neu-spiral/rasp_compression) | Pipelined Gemma-2 2B inference with activation compression across a Raspberry Pi cluster over WiFi. |
 | PRESCIENT (Ohio State) | [`PRESCIENT-osu/DNN-comm-compression`](https://github.com/PRESCIENT-osu/DNN-comm-compression) | Pipelined distributed inference over a programmable wide-area network, with configurable per-link bandwidth, delay, and loss. |
-| Jetson | not yet public | Four-node Jetson deployment, plus the accuracy-function fitting and trace-collection code behind `assets/`. |
 
 The Jetson repository is where the fitted accuracy models and measured traces
 bundled in [`assets/`](assets/README.md) come from, and it documents how to
 regenerate them; its fitting workflow is platform-independent and runs on CPU or
 GPU outside Jetson.
 
-## Citation
-
-```bibtex
-@inproceedings{communication_aware_inference_2026,
-  author    = {Peyman Gholami and
-               Theodoros-Thirimachos Davarakis and
-               Teng Li and
-               Miquel {Sirera Perelló} and
-               Salil Reddy and
-               Ayberk Yarkın Yıldız and
-               Anish Arora and
-               Atilla Eryilmaz and
-               Stratis Ioannidis and
-               Chengzhang Li and
-               Hulya Seferoglu and
-               Ness Shroff},
-  title     = {Communication-Aware Model Distributed Inference via
-               Latent Representation Compression},
-  booktitle = {Proceedings of ACM MobiHoc},
-  year      = {2026}
-}
-```
-
-## Acknowledgements
-
-TO DO
-
-## License
-
-MIT. See [LICENSE](LICENSE).
+For an interactive view of the trade-off this paper optimizes,
+[`clarayliu09/jarvis-visualization-demo`](https://github.com/clarayliu09/jarvis-visualization-demo)
+replays Raspberry Pi traces across compression ratios from `eta = 0.1` to `1.0`,
+showing the effect of `eta` on generation speed and output quality side by side.
 
 ## Install
 
@@ -288,3 +263,39 @@ both the activation hooks and `LLMInt8Compressor`'s parameters. For all three,
 property the optimizers rely on when they treat links semi-independently, across
 all seven scenarios and three codecs. See
 [experiments/concavity/README.md](experiments/concavity/README.md).
+## Acknowledgements
+
+This work was supported by the National Science Foundation through the AI-EDGE
+Institute (Award No. 2112471) and by the Army Research Office under Grant
+No. W911NF-24-1-0103.
+
+## Citation
+
+```bibtex
+@inproceedings{communication_aware_inference_2026,
+  author    = {Peyman Gholami and
+               Theodoros-Thirimachos Davarakis and
+               Teng Li and
+               Miquel {Sirera Perelló} and
+               Salil Reddy and
+               Ayberk Yarkın Yıldız and
+               Anish Arora and
+               Atilla Eryilmaz and
+               Stratis Ioannidis and
+               Chengzhang Li and
+               Hulya Seferoglu and
+               Ness Shroff},
+  title     = {Communication-Aware Model Distributed Inference via
+               Latent Representation Compression},
+  booktitle = {Proceedings of ACM MobiHoc},
+  year      = {2026}
+}
+```
+
+## License
+
+MIT. See [LICENSE](LICENSE).
+
+This repository also redistributes third-party material under its own terms —
+the CIFAR ResNet implementation and the pretrained ResNet-56 checkpoint are
+BSD-2-Clause. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
