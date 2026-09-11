@@ -266,8 +266,8 @@ all seven scenarios and three codecs. See
 ## Acknowledgements
 
 This work was supported by the National Science Foundation through the AI-EDGE
-Institute (Award No. 2112471) and by the Army Research Office under Grant
-No. W911NF-24-1-0103.
+Institute (Award No. 2112471), by the Army Research Laboratory under Grant 
+No. W911NF-24-2-0172, and by the Army Research Office under Grant No. W911NF-24-1-0103.
 
 ## Citation
 
