@@ -64,10 +64,22 @@ ACC_EXTRA="--samples_per_subject 20 --n_shot 5 --max_length 512 --batch_size 16"
 
 OUT="${REPO_ROOT}/outputs/mc_concavity"
 
-# FIRST_DEP: chain after the currently-running job (8042521) so we don't
-# duplicate GPU work on the same rays file while it's still writing.
-echo "Chaining fill for: llama_mmlu_reserve_c4 (currently running as 8042521, will continue after it exits)"
-FIRST_DEP=8042521 submit_chain llama_mmlu_reserve_c4 meta-llama/Llama-3.1-8B mmlu accuracy llmint8_reserve \
+# One worked example: top up the Llama/MMLU llmint8 rays. Edit or copy the
+# submit_chain line for other tasks; the arguments are
+#   NAME MODEL DATASET METRIC STRATEGY RAYS_JSON OUT_DIR TOL EXTRA_ARGS
+# and RAYS_JSON must already exist (produced by run_mc_concavity.sh, optionally
+# merged with merge_quant_shards.py).
+#
+# Set FIRST_DEP=<jobid> in the environment to hang the first link off a job that
+# is still writing the same rays file, so the chain does not duplicate GPU work:
+#   FIRST_DEP=123456 bash experiments/concavity/slurm/run_mc_fill_chain.sh
+# Left unset, the first link starts as soon as the scheduler has a GPU.
+if [ -n "${FIRST_DEP:-}" ]; then
+    echo "Chaining fill for: llama_mmlu_reserve_c4 (after job ${FIRST_DEP})"
+else
+    echo "Chaining fill for: llama_mmlu_reserve_c4 (no initial dependency)"
+fi
+submit_chain llama_mmlu_reserve_c4 meta-llama/Llama-3.1-8B mmlu accuracy llmint8_reserve \
     ${OUT}/meta-llama_Llama-3.1-8B/mmlu_accuracy/reserve_merged_rays.json \
     ${OUT}/meta-llama_Llama-3.1-8B/mmlu_accuracy 0.02 "${ACC_EXTRA}"
 

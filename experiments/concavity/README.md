@@ -105,7 +105,11 @@ Ray data and generated plots land under `outputs/`, which is gitignored.
 Plotting needs `numpy` and `matplotlib`. Data generation also needs `torch`,
 `transformers`, a GPU, and local copies of the gated Llama and Gemma
 checkpoints. Submit scripts activate a conda env named `easy`; override with
-`CONDA_ENV=<name>`.
+`CONDA_ENV=<name>`, or edit the two `conda` lines in the wrapper if you followed
+the venv install in the top-level README. `run_quant_enum.sh` and
+`run_t5_llmint8.sh` additionally export `HF_HOME` from `HF_CACHE`, which
+defaults to `${HOME}/.cache/huggingface`; point it at a cache that already holds
+the gated checkpoints to run offline.
 
 Corpus and MMLU loading fetches Hub parquet directly through
 `huggingface_hub` and reads it with pandas, because the pinned
@@ -114,7 +118,14 @@ Corpus and MMLU loading fetches Hub parquet directly through
 
 ## Reproducing the figures
 
-Needs no model or GPU, only a populated `outputs/mc_concavity/`:
+`outputs/` is gitignored, so the ray tree is **not** shipped with the
+repository: a fresh clone has `figures/` (the released artifacts) but no
+`outputs/mc_concavity/`. Regenerate the rays first with the four arms under
+[Regenerating ray data](#regenerating-ray-data) — that is the part that needs a
+GPU and the gated checkpoints — or ask the authors for the ray tree.
+
+With `outputs/mc_concavity/` populated, the plotting step itself needs no model
+and no GPU:
 
 ```bash
 python experiments/concavity/plot_concavity_per_method.py \
@@ -161,7 +172,9 @@ Four arms write the same ray schema and can be regenerated independently.
 ### LLM Monte-Carlo rays (gemma, Llama)
 
 ```bash
-# smoke test, a few minutes
+# smoke test. Phase 2 still defaults to 80 rays, so this is 100 rays in total:
+# measured 773 s on a V100-SXM2 at 7.4 s/ray, model load included. Add
+# --phase2_rays 0 for a phase-1-only version in about a fifth of that.
 python experiments/concavity/mc_concavity.py run \
     --model meta-llama/Llama-3.1-8B \
     --dataset wikitext --metric perplexity --strategy topk_per_token \

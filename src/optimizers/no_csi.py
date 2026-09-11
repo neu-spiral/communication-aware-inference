@@ -17,13 +17,13 @@ class NoCSISingleTaskOptimizer(BaseOptimizer):
 
 
     def _build_bounds(self, task: InferenceTask, links: List[int], max_tau: float) -> List[Tuple[Optional[float], Optional[float]]]:
-        """Enforces \eta_i^{min} <= \eta_i <= 1 and z >= max(\tau)."""
+        r"""Enforces \eta_i^{min} <= \eta_i <= 1 and z >= max(\tau)."""
         bounds = [(task.eta_min[i], 1.0) for i in links]
         bounds.append((max_tau, None)) # Auxiliary variable z
         return bounds
 
     def _objective_function(self, x: np.ndarray, task: InferenceTask) -> Tuple[float, np.ndarray]:
-        """Evaluates min -A(\eta) + \mu * \lambda_t * z."""
+        r"""Evaluates min -A(\eta) + \mu * \lambda_t * z."""
         eta_flat = x[:-1]
         z = x[-1]
         
@@ -39,7 +39,7 @@ class NoCSISingleTaskOptimizer(BaseOptimizer):
         return obj_val, grad
 
     def _build_constraints(self, task: InferenceTask, links: List[int], c_hat: np.ndarray) -> List[Dict[str, Any]]:
-        """Enforces z >= (a_i / \hat{c}_i) * \eta_i for all links."""
+        r"""Enforces z >= (a_i / \hat{c}_i) * \eta_i for all links."""
         constraints = []
         for idx, i in enumerate(links):
             beta = task.a[i] / c_hat[i]
@@ -112,7 +112,7 @@ class NoCSIMultiTaskOptimizer(BaseOptimizer):
     # ==========================================
 
     def _phase_a_objective(self, z_flat: np.ndarray, active_tasks: List[InferenceTask]) -> Tuple[float, np.ndarray]:
-        """Objective: min \sum \mu * \lambda_k * z_k[cite: 352]."""
+        r"""Objective: min \sum \mu * \lambda_k * z_k."""
         obj_val = sum(self.mu * self.lambda_k[task.task_id] * z_flat[idx] for idx, task in enumerate(active_tasks))
         grad = np.array([self.mu * self.lambda_k[task.task_id] for task in active_tasks])
         return obj_val, grad
@@ -169,7 +169,7 @@ class NoCSIMultiTaskOptimizer(BaseOptimizer):
     # ==========================================
 
     def _phase_b_objective(self, x: np.ndarray, task: InferenceTask) -> Tuple[float, np.ndarray]:
-        """Objective: min -w_k * A_k + \mu * \lambda_k * z_k."""
+        r"""Objective: min -w_k * A_k + \mu * \lambda_k * z_k."""
         eta_flat = x[:-1]
         z = x[-1]
         acc = task.A_k(eta_flat)

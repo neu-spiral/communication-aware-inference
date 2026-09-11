@@ -3,8 +3,10 @@ Measure the per-stage compute time and per-link payload of a pipelined LLM.
 
 The offline optimizer needs two topology inputs per task: ``tau[i]``, the
 compute time of stage ``i``, and ``a[i]``, the bytes crossing link ``i``. This
-script measures them on real hardware instead of estimating, and appends the
-result to a JSON profile the task instances read at setup time.
+script measures them on real hardware instead of estimating, and records the
+result in a JSON profile the task instances read at setup time, keyed by
+``(model, n_stages, batch_size, seq_len)``. The key carries no device, so
+re-running on different hardware replaces the stored record for that shape.
 
 Stages are contiguous groups of decoder layers. An ``L_k``-stage pipeline has
 ``L_k - 1`` links, and the tensor on every link is the hidden state, so

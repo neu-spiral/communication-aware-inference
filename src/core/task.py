@@ -52,7 +52,7 @@ class InferenceTask:
         return self._accuracy_callable(eta_vec)
         
     def grad_A_k(self, eta_vec: np.ndarray) -> np.ndarray:
-        """
+        r"""
         Evaluates and returns ONLY the gradient vector with respect to \eta.
         """
         return self._gradient_callable(eta_vec)

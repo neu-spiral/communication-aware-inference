@@ -20,6 +20,15 @@ from ..toy_A import grad_oracle
 
 _ROOT = Path(__file__).resolve().parents[3]
 _DEFAULT_DATA_ROOT = _ROOT / "data"
+_ASSETS = _ROOT / "assets"
+_DEFAULT_CHECKPOINT = _ASSETS / "resnet56-4bfd9763.th"
+# Poly3 accuracy fits, one per codec (see assets/README.md). The top-k fit is
+# the one with no codec in its filename.
+_DEFAULT_FITTING_MODELS = {
+    "topk": _ASSETS / "jetson_resnet_3tp_poly3_flex.pkl",
+    "quantization": _ASSETS / "jetson_resnet_3tp_quantization_poly3_flex.pkl",
+    "llmint8": _ASSETS / "jetson_resnet_3tp_llmint8_fp16_int4_poly3_flex.pkl",
+}
 _DEFAULT_DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 # Default compute/communication profile (4-node / 3-link chain) when no trace path is set.
@@ -103,8 +112,10 @@ def _resolve_compressor_name(override_name: str | None = None) -> str:
 
 
 def _resolve_fitting_model_path(compressor_name: str) -> Path:
-    del compressor_name  # codec-specific defaults are not bundled; path must be set explicitly
-    return _env_path("RESNET56_FITTING_MODEL_PATH")
+    return _env_path(
+        "RESNET56_FITTING_MODEL_PATH",
+        _DEFAULT_FITTING_MODELS.get(compressor_name),
+    )
 
 
 def _resolve_llmint8_mapping_path() -> Path | None:
@@ -379,13 +390,13 @@ def _build_test_loader(data_root: Path, batch_size: int = 100, download: bool = 
 
 def setup_model_and_callables(*, compressor_name: str | None = None):
     device = torch.device(os.environ.get("RESNET56_PHASE1_DEVICE", _DEFAULT_DEVICE))
-    checkpoint_path = _env_path("RESNET56_PHASE1_CHECKPOINT")
+    checkpoint_path = _env_path("RESNET56_PHASE1_CHECKPOINT", _DEFAULT_CHECKPOINT)
     data_root = _env_path("RESNET56_PHASE1_DATA_ROOT", _DEFAULT_DATA_ROOT)
     fast_samples = int(os.environ.get("RESNET56_PHASE1_FAST_SAMPLES", str(_DEFAULT_FAST_SAMPLES)))
     true_samples = int(os.environ.get("RESNET56_PHASE1_TRUE_SAMPLES", str(_DEFAULT_TRUE_SAMPLES)))
     sigma = float(os.environ.get("RESNET56_PHASE1_SIGMA", str(_DEFAULT_SIGMA)))
     stein_n = int(os.environ.get("RESNET56_PHASE1_STEIN_N", str(_DEFAULT_N)))
-    download = os.environ.get("RESNET56_PHASE1_DOWNLOAD", "0").strip() in {"1", "true", "True"}
+    download = os.environ.get("RESNET56_PHASE1_DOWNLOAD", "1").strip() in {"1", "true", "True"}
     compressor_name = _resolve_compressor_name(compressor_name)
 
     model = _load_model(checkpoint_path, device)

@@ -5,7 +5,7 @@ matplotlib
 torch
 torchvision
 
-# Optional LLM backend (see README_LLM.md)
+# Optional LLM backend (see the "LLM tasks" section of README.md)
 transformers>=4.41.2
 datasets>=2.19.2
 # The corpus/MMLU loaders read Hub parquet directly, because the pinned

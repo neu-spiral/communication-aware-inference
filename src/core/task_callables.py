@@ -148,7 +148,7 @@ def main():
                                  flat_theta=flat_theta, device=device)
 
     # -- wire into InferenceTask --
-    from task import InferenceTask   # the provided class
+    from .task import InferenceTask
 
     task = InferenceTask(
         task_id          = 0,
