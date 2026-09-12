@@ -8,8 +8,8 @@ torchvision
 # Optional LLM backend (see the "LLM tasks" section of README.md)
 transformers>=4.41.2
 datasets>=2.19.2
-# The corpus/MMLU loaders read Hub parquet directly, because the pinned
-# datasets/fsspec pair cannot resolve the Hub's glob patterns.
+# The corpus/MMLU loaders read Hub parquet directly, because some
+# datasets/fsspec combinations cannot resolve the Hub's glob patterns.
 pandas
 huggingface_hub
 accelerate>=0.30.1

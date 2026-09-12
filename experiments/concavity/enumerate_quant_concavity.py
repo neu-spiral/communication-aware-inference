@@ -36,7 +36,7 @@ undefined for c > 0.5. The exact-grid concavity (this script's headline,
 Monte-Carlo -- that is the number to report for quantization.
 
 Example (smoke, tiny grid on CPU-loadable model):
-  python experiments/enumerate_quant_concavity.py \
+  python experiments/concavity/enumerate_quant_concavity.py \
       --model sshleifer/tiny-gpt2 --dataset wikitext --metric perplexity \
       --n_cuts 3 --max_texts 4 --max_length 64 \
       --out_dir outputs/mc_concavity/smoke_quant
@@ -288,7 +288,7 @@ def parse_args(argv=None) -> argparse.Namespace:
     p.add_argument("--shard_count", type=int, default=1,
                    help="split the point list round-robin across this many "
                         "workers (each writes its own *_grid.shardIofN.partial "
-                        "checkpoint; union them with merge_quant_shards.py)")
+                        "checkpoint)")
     p.add_argument("--shard_index", type=int, default=0,
                    help="which slice this worker evaluates, in [0,shard_count)")
     p.add_argument("--points_file", default="",
@@ -330,7 +330,7 @@ def main() -> None:
     # points touched by a random sample of axis-lines (for large n, e.g. cuts7).
     # FILL mode: evaluate an explicit list of lattice points (the ones a
     # random-box-ray resampling needs but the sparse grid is missing -- see
-    # experiments/quant_box_rays.py, which writes *_missing_points.json). Ray
+    # experiments/concavity/quant_box_rays.py, which writes *_missing_points.json). Ray
     # assembly is skipped; the point of the run is purely to extend the grid.
     fill_mode = bool(args.points_file)
     if fill_mode:
@@ -350,8 +350,8 @@ def main() -> None:
     # A single worker is walltime-bound on the big grids (llama/mmlu is ~168 s
     # per lattice point in FP32, i.e. ~29 h for 5^4). Split the point list
     # round-robin across N workers, each checkpointing to its OWN file so there
-    # is no write race, then union them with experiments/merge_quant_shards.py.
-    # Slices are disjoint, so no point is ever evaluated twice.
+    # is no write race. Slices are disjoint, so no point is ever evaluated
+    # twice, and the shard checkpoints can be unioned afterwards.
     sharded = args.shard_count > 1
     if sharded and not (0 <= args.shard_index < args.shard_count):
         raise SystemExit(f"--shard_index must be in [0,{args.shard_count})")

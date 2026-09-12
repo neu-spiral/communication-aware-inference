@@ -1225,7 +1225,7 @@ def cmd_enumerate(args) -> None:
 
     Evaluates every level^n lattice point exactly (both metrics share the model
     load) and writes axis-aligned rays that jensen folds in as the quantization
-    curve. See experiments/enumerate_quant_concavity.py for the rationale."""
+    curve. See experiments/concavity/enumerate_quant_concavity.py for the rationale."""
     import itertools
     import torch
 

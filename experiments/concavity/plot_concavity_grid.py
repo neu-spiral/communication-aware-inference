@@ -9,7 +9,7 @@ one fixed tol per metric, so each subplot shows how forgiving the concavity
 test needs to be before each strategy's curve saturates.
 
 Usage:
-  python experiments/plot_concavity_grid.py \
+  python experiments/concavity/plot_concavity_grid.py \
       --root outputs/mc_concavity --out outputs/mc_concavity/jensen/concavity_grid.png
 """
 from __future__ import annotations

@@ -19,7 +19,7 @@ Read out of the code, then confirmed against the grids:
   LLM   (gemma, llama)  src/core/llm_compression.py:177-188
         eta >= 1 -> FP32 passthrough; else FLOOR to the ladder
         (>=0.5 FP16, >=0.25 INT8, >=0.125 INT4, else INT2).
-  T5    flant5_sst2_concavity_test/compressors.py:396-407
+  T5    flant5_sst2/compressors.py:396-407
         eta >= 1 -> passthrough; else FLOOR, same thresholds.
   ResNet src/core/resnet_task_callables.py:249 + gpu_compressors.py:351-356
         eta >= 1 -> passthrough; else CEIL (k < L+1e-6 picks L), and
@@ -35,8 +35,8 @@ the deployed compressor does. Both are provided; `code` is the default because
 it is the only one that describes a real operating point.
 
 Usage:
-  python experiments/quant_box_rays.py --group_dir <dir> [--snap code|nearest]
-  python experiments/quant_box_rays.py --all           # every quant group
+  python experiments/concavity/quant_box_rays.py --group_dir <dir> [--snap code|nearest]
+  python experiments/concavity/quant_box_rays.py --all           # every quant group
 """
 
 from __future__ import annotations

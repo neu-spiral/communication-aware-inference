@@ -35,7 +35,7 @@ Outputs (per model x strategy x ray) under --out_dir:
   - all_summary.json                   (aggregate across everything)
 
 Example:
-  python experiments/ray_concavity_score.py \
+  python experiments/concavity/ray_concavity_score.py \
       --models meta-llama/Llama-3.1-8B google/gemma-7b \
       --strategies topk_per_token llmint8 \
       --n_cuts 5 --n_points 6 --max_texts 64 --max_length 512

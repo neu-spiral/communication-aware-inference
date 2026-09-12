@@ -2,7 +2,7 @@
 Jensen-inequality concavity estimate vs a scalar eta-floor (model-free).
 
 This is a POST-HOC re-analysis of the rays already computed by
-``experiments/mc_concavity.py`` (the ``*_rays.json`` profiles). It does NOT load
+``experiments/concavity/mc_concavity.py`` (the ``*_rays.json`` profiles). It does NOT load
 any model — it only reads the saved (eta-vector, metric) samples along each ray.
 
 Idea
@@ -36,7 +36,7 @@ strategy, one plot per (model, task).
 
 Usage
 -----
-  python experiments/jensen_concavity.py \
+  python experiments/concavity/jensen_concavity.py \
       --root outputs/mc_concavity --out_dir outputs/mc_concavity/jensen
 """
 

@@ -23,13 +23,9 @@ each testbed has its own repository:
 
 The Jetson repository is where the fitted accuracy models and measured traces
 bundled in [`assets/`](assets/README.md) come from, and it documents how to
-regenerate them; its fitting workflow is platform-independent and runs on CPU or
-GPU outside Jetson.
-
-For an interactive view of the trade-off this paper optimizes,
+regenerate them. For an interactive view of the trade-off this paper optimizes,
 [`clarayliu09/jarvis-visualization-demo`](https://github.com/clarayliu09/jarvis-visualization-demo)
-replays Raspberry Pi traces across compression ratios from `eta = 0.1` to `1.0`,
-showing the effect of `eta` on generation speed and output quality side by side.
+replays Raspberry Pi traces across compression ratios from `eta = 0.1` to `1.0`.
 
 ## Install
 
@@ -41,36 +37,11 @@ pip install -r requirements.txt
 
 Run scripts from the repository root so `from src...` imports resolve.
 
-### Matching the PyTorch wheel to your driver
-
-`requirements.txt` is intentionally unpinned, so `pip` installs the current
-PyTorch release, whose default wheel targets the newest CUDA. If your NVIDIA
-driver is older than that wheel's CUDA version, PyTorch imports fine but
-`torch.cuda.is_available()` returns `False` with *"The NVIDIA driver on your
-system is too old"*, and every GPU task silently runs on CPU instead. Check the
-driver's CUDA version with `nvidia-smi` and, if it is older, install a matching
-wheel first:
-
-```bash
-# example: a CUDA 12.x driver
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cu126
-pip install -r requirements.txt
-```
-
-Confirm before starting a campaign:
-
-```bash
-python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
-```
-
-### Tests
-
-The codec equivalence checks are standalone scripts, not a `pytest` suite:
-
-```bash
-python tests/test_gpu_compressors.py                # uses the GPU if present
-python tests/test_gpu_compressors.py --device cpu   # CPU-only
-```
+`requirements.txt` is unpinned, so `pip` installs the current PyTorch release,
+whose default wheel targets the newest CUDA. If your driver is older,
+`torch.cuda.is_available()` returns `False` and every GPU task silently runs on
+CPU; check `nvidia-smi` and install a matching wheel first, e.g.
+`pip install torch torchvision --index-url https://download.pytorch.org/whl/cu126`.
 
 ## Public entry points
 
@@ -102,16 +73,9 @@ python compare_to_baselines_multi.py \
   --out_dir outputs/baseline_compare_multi
 ```
 
-Both examples are small but not quick. Every time slot evaluates the true
-accuracy over the whole MNIST test set once per algorithm, and the CSI-oblivious
-optimizer calls a 50-sample Stein gradient oracle inside a SciPy minimize, so
-cost grows with `--T`, with `--K`, and with the number of baselines. Measured on
-8 CPU cores with the seven default baselines: about 80 s of fixed setup (the
-three training epochs), then roughly 24 s per time slot for the single-task
-example and 51 s per slot for the two-task one. That puts the `--T 100`
-single-task command above at around 40 minutes and the `--T 150` multi-task one
-at over two hours. Lower `--T`, or pass `--baseline_algorithms none`, while
-iterating.
+Every time slot evaluates the true accuracy once per algorithm, so cost grows
+with `--T`, with `--K`, and with the number of baselines. Lower `--T`, or pass
+`--baseline_algorithms none`, while iterating.
 
 ### Replot saved results
 
@@ -141,18 +105,14 @@ Registered task names are listed in `--task` / `--tasks` help text (via
 ## Package layout
 
 ```
-src/core/                 # InferenceTask, callables, Stein oracles
-src/core/compressors.py   # topk / quantization / llmint8 codecs
-src/core/gpu_compressors.py  # same codecs, payload stays on device
-src/core/llmint8.py       # the llmint8 scheme: eta -> bit allocation
+src/core/                 # InferenceTask, callables, compressors, Stein oracles
 src/core/resnet20.py      # CIFAR ResNet architectures (incl. ResNet-56)
 src/core/task_instances/  # Plug-in task families
 src/optimizers/           # CSI / no-CSI optimizers, estimators, baselines
 profile_llm_stages.py     # Measures per-stage tau and per-link a for an LLM task
-assets/                   # ResNet checkpoint, traces, fitting models,
-                          #   llm_stage_profiles.json (see assets/README.md)
+assets/                   # ResNet checkpoint, traces, fitting models, stage
+                          #   profiles (see assets/README.md)
 experiments/concavity/    # Concavity study: is utility concave in eta?
-tests/                    # CPU/GPU codec equivalence
 ```
 
 ## Adding a task instance
@@ -161,7 +121,8 @@ tests/                    # CPU/GPU codec equivalence
    - `setup_model_and_callables(**kwargs) -> (api, extra)`
    - `make_task(task_id, api, w_k=..., R_k=..., **kwargs) -> InferenceTask`
 2. Register it in `src/core/task_handler.py` (or call `register_task(...)`).
-3. Pass `--task <name>` (or `--tasks ...`) and set `--M` equal to the task's `L_k`.
+3. Pass `--task <name>` (or `--tasks ...`) and set `--M` equal to the task's
+   number of stages.
 
 See the docstring in `src/core/task_instances/__init__.py` for the full contract.
 Shared codecs live in `src/core/compressors.py`.
@@ -174,19 +135,10 @@ Shared codecs live in `src/core/compressors.py`.
 | `resnet56_cifar10_topk` | ResNet-56 / CIFAR-10, top-`k` compression (`--M 4`) |
 | `resnet56_cifar10_quantization` | Same module, quantization codec |
 | `resnet56_cifar10_llmint8` | Same module, LLM.int8-style codec |
-| `gemma2b_sharegpt_ppl_{topk,quantization,llmint8}` | Gemma-2B / ShareGPT, bounded perplexity (`--M 5`) |
-| `gemma7b_sharegpt_ppl_{topk,quantization,llmint8}` | Gemma-7B / ShareGPT, bounded perplexity (`--M 5`) |
-| `llama31_8b_wikitext_ppl_{topk,quantization,llmint8}` | Llama-3.1-8B / WikiText-2, bounded perplexity (`--M 5`) |
-| `llama31_8b_mmlu_{topk,quantization,llmint8}` | Llama-3.1-8B / 5-shot MMLU, accuracy (`--M 5`) |
-| `flant5_sst2_{topk,quantization,llmint8}` | Flan-T5-base / SST-2, accuracy (`--M 4`) |
 
-ResNet defaults load from `assets/`: the checkpoint
-(`resnet56-4bfd9763.th`) and, in `fitting_model` mode, the poly3 fit for the
-selected codec. `tau` and `a` default to the per-link medians of the bundled
-15 Mbps trace, inlined as constants; set `RESNET56_PHASE1_TRACE_PATH` to
-recompute them from a trace file instead.
-[`assets/README.md`](assets/README.md) describes what each file holds and how it
-was produced. Override paths with environment variables if needed:
+ResNet defaults load from `assets/` (checkpoint, 15 Mbps scenario trace, and
+optional poly3 fitting models). Override paths with environment variables if
+needed:
 
 ```bash
 # defaults already point at assets/; CIFAR-10 downloads under ./data
@@ -200,79 +152,24 @@ python compare_to_baselines.py --task resnet56_cifar10_topk --M 4 \
 ```
 
 Other useful env vars: `RESNET56_PHASE1_DEVICE`, `RESNET56_PHASE1_FAST_SAMPLES`,
-`RESNET56_PHASE1_TRUE_SAMPLES`, `RESNET56_PHASE1_STEIN_N`,
-`RESNET56_PHASE1_SIGMA`, `RESNET56_PHASE1_ETA_MIN`,
-`RESNET56_PHASE1_DOWNLOAD` (`1` by default, so CIFAR-10 is fetched into
-`--data_root` if absent; set `0` on a node with no network),
-`RESNET56_ACCURACY_ESTIMATOR_MODE` (`stein_estimator` or `fitting_model`),
-`RESNET56_FITTING_MODEL_PATH`, and, for the llmint8 codec,
-`RESNET56_LLMINT8_POLICY`, `RESNET56_LLMINT8_OUTLIER_PRECISION`,
-`RESNET56_LLMINT8_REGULAR_PRECISION`, `RESNET56_LLMINT8_MAPPING_PATH`.
+`RESNET56_PHASE1_STEIN_N`, `RESNET56_PHASE1_SIGMA`, `RESNET56_PHASE1_ETA_MIN`,
+`RESNET56_PHASE1_DOWNLOAD` (set `0` on a node with no network),
+`RESNET56_ACCURACY_ESTIMATOR_MODE` (`stein_estimator` or `fitting_model`), and
+`RESNET56_FITTING_MODEL_PATH`.
 
 ## LLM tasks
 
 The five language scenarios are task instances like any other, registered once
-per codec. Append `_topk`, `_quantization` or `_llmint8` to the name and set
-`--M` to the task's `L_k`.
+per codec. Append `_topk`, `_quantization` or `_llmint8` to the name, and set
+`--M` to the number of stages: 5 for the Gemma and Llama tasks, 4 for Flan-T5.
 
-| Task | Model | Data / metric | `L_k` | Scenario |
-|---|---|---|---|---|
-| `gemma2b_sharegpt_ppl` | Gemma-2B | ShareGPT, bounded perplexity | 5 | G1-2B-SGPT |
-| `gemma7b_sharegpt_ppl` | Gemma-7B | ShareGPT, bounded perplexity | 5 | G1-7B-SGPT |
-| `llama31_8b_wikitext_ppl` | Llama-3.1-8B | WikiText-2, bounded perplexity | 5 | Ll3-8B-WT |
-| `llama31_8b_mmlu` | Llama-3.1-8B | 5-shot MMLU, accuracy | 5 | Ll3-8B-MMLU |
-| `flant5_sst2` | Flan-T5-base | SST-2, accuracy | 4 | FT5-SST2 |
-
-`eta` has one entry per compressed link, so `dim(eta) = L_k - 1`, and is a
-compression ratio in `[0, 1]` for all three codecs. Cut points are evenly spaced
-decoder layers; for Flan-T5 they are the two encoder-block boundaries plus the
-encoder's final layer norm, which is the tensor the decoder receives.
-
-The perplexity tasks report a bounded score,
-`min{1, PPL_reference / PPL_compressed}`, so every task's utility lies in
-`(0, 1]` like an accuracy.
-
-Model weights are not bundled. The Gemma and Llama checkpoints are gated on the
-Hub: run `hf auth login` (`huggingface-cli` was removed in
-`huggingface_hub` 1.0), or point `HF_HOME` at a cache that has them.
-
-### Stage profiles
-
-The LLM tasks read `tau` and `a` from `assets/llm_stage_profiles.json`, keyed by
-`(model, n_stages, batch_size, seq_len)`. Setup fails with the command to run if
-an entry is missing, rather than substituting an estimate.
-
-```bash
-python profile_llm_stages.py --model google/gemma-2b --n_stages 5 \
-    --batch_size 1 --seq_len 512
-```
-
-This times each layer inside a real forward pass and writes the result into
-`assets/llm_stage_profiles.json`. Per-link bytes are computed from the
-hidden-state shape. `tau` is device-specific and each record names the device it
-came from; the bundled profile is a Tesla V100-SXM2 and covers every task's
-defaults:
-
-| Task | Profile arguments |
-|---|---|
-| `gemma2b_sharegpt_ppl` | `--model google/gemma-2b --n_stages 5 --batch_size 1 --seq_len 512` |
-| `gemma2b_sharegpt_ppl`, `LLM_TASK_N_STAGES=8` | `--model google/gemma-2b --n_stages 8 --batch_size 1 --seq_len 512` |
-| `gemma7b_sharegpt_ppl` | `--model google/gemma-7b --n_stages 5 --batch_size 1 --seq_len 512` |
-| `llama31_8b_wikitext_ppl` | `--model meta-llama/Llama-3.1-8B --n_stages 5 --batch_size 1 --seq_len 512` |
-| `llama31_8b_mmlu` | `--model meta-llama/Llama-3.1-8B --n_stages 5 --batch_size 4 --seq_len 2048` |
-| `flant5_sst2` | `--model google/flan-t5-base --n_stages 4 --batch_size 16 --seq_len 128 --dtype float32` |
-
-MMLU declares `seq_len 2048`, the ceiling `MMLUEvaluator` applies at
-`n_shot > 0`. Flan-T5 is profiled in FP32: its SST-2 verbalizer margin is
-narrower than FP16 resolution.
-
-Records are keyed by `(model, n_stages, batch_size, seq_len)` only — the device
-is stored in the record, not in the key. Re-profiling one of the rows above on
-different hardware therefore **overwrites** the bundled V100 numbers for that
-shape rather than adding a second entry; `git checkout --
-assets/llm_stage_profiles.json` puts them back.
-
-### Running
+| Task | Model | Data / metric | Scenario |
+|---|---|---|---|
+| `gemma2b_sharegpt_ppl` | Gemma-2B | ShareGPT, bounded perplexity | G1-2B-SGPT |
+| `gemma7b_sharegpt_ppl` | Gemma-7B | ShareGPT, bounded perplexity | G1-7B-SGPT |
+| `llama31_8b_wikitext_ppl` | Llama-3.1-8B | WikiText-2, bounded perplexity | Ll3-8B-WT |
+| `llama31_8b_mmlu` | Llama-3.1-8B | 5-shot MMLU, accuracy | Ll3-8B-MMLU |
+| `flant5_sst2` | Flan-T5-base | SST-2, accuracy | FT5-SST2 |
 
 ```bash
 python compare_to_baselines.py \
@@ -281,26 +178,28 @@ python compare_to_baselines.py \
   --out_dir outputs/llama_wt_compare
 ```
 
-Each `accuracy_callable` is a forward pass over the eval subset and the Stein
-oracle needs `2 * grad_N` of them, so a step costs far more than on the toy MLP.
-`llama31_8b_mmlu` runs about 50 s per evaluation on a V100.
+The perplexity tasks report a bounded score,
+`min{1, PPL_reference / PPL_compressed}`, so every task's utility lies in
+`(0, 1]` like an accuracy.
 
-On the accuracy tasks the gradient can come back exactly zero, because a
-discrete metric does not move unless a perturbation flips a prediction. They
-default to `grad_sigma=0.1`, against `0.05` for the perplexity tasks. If
-gradients are still zero, widen `LLM_TASK_GRAD_SIGMA` or raise
-`LLM_TASK_FAST_SAMPLES`, which sets the accuracy granularity.
+Model weights are not bundled. The Gemma and Llama checkpoints are gated on the
+Hub: run `hf auth login`, or point `HF_HOME` at a cache that has them.
 
-Optional per-task overrides: `LLM_TASK_N_STAGES` (8 gives the `cuts7` Gemma-2B
-variant), `LLM_TASK_ETA_MIN`, `LLM_TASK_FAST_SAMPLES`, `LLM_TASK_TRUE_SAMPLES`,
-`LLM_TASK_MAX_LENGTH`, `LLM_TASK_BATCH_SIZE`, `LLM_TASK_GRAD_SIGMA`,
-`LLM_TASK_GRAD_N`, `LLM_TASK_MMLU_N_SHOT`, `LLM_TASK_SEED`, and
-`FLANT5_SST2_DATA`. Changing `LLM_TASK_N_STAGES`, `LLM_TASK_BATCH_SIZE` or
-`LLM_TASK_MAX_LENGTH` requires a matching profile entry.
+`tau` and `a` are read from `assets/llm_stage_profiles.json`, keyed by
+`(model, n_stages, batch_size, seq_len)`. The bundled profile covers every
+task's defaults; if an entry is missing, setup fails with the command to run:
 
-`COMPRESSOR_BACKEND=cpu|gpu` selects the compressor implementation. The two are
-not numerically identical, so fix it for the duration of a campaign; see
-`src/core/gpu_compressors.py`.
+```bash
+python profile_llm_stages.py --model google/gemma-2b --n_stages 5 \
+    --batch_size 1 --seq_len 512
+```
+
+Optional per-task overrides: `LLM_TASK_N_STAGES`, `LLM_TASK_ETA_MIN`,
+`LLM_TASK_FAST_SAMPLES`, `LLM_TASK_TRUE_SAMPLES`, `LLM_TASK_MAX_LENGTH`,
+`LLM_TASK_BATCH_SIZE`, `LLM_TASK_GRAD_SIGMA`, `LLM_TASK_GRAD_N`,
+`LLM_TASK_MMLU_N_SHOT`, `LLM_TASK_SEED`, and `FLANT5_SST2_DATA`. Changing
+`LLM_TASK_N_STAGES`, `LLM_TASK_BATCH_SIZE` or `LLM_TASK_MAX_LENGTH` requires a
+matching profile entry.
 
 ## Compression codecs
 
@@ -310,10 +209,10 @@ not numerically identical, so fix it for the duration of a campaign; see
 | `quantization` | a bit width from {2, 4, 8, 16, 32}, at a per-token scale |
 | `llmint8` | a two-band split: FP16 outliers plus a low band stepping `int8` → `int4` → `int2` → drop |
 
-`src/core/llmint8.py` is the single definition of the llmint8 scheme and serves
-both the activation hooks and `LLMInt8Compressor`'s parameters. For all three,
-`eta` is a compression ratio, which is what makes them comparable at equal
-`eta`.
+For all three, `eta` is a compression ratio in `[0, 1]`, which is what makes
+them comparable at equal `eta`. `COMPRESSOR_BACKEND=cpu|gpu` selects the
+implementation; the two are not numerically identical, so fix it for the
+duration of a campaign.
 
 ## Concavity study
 
@@ -321,6 +220,7 @@ both the activation hooks and `LLMInt8Compressor`'s parameters. For all three,
 property the optimizers rely on when they treat links semi-independently, across
 all seven scenarios and three codecs. See
 [experiments/concavity/README.md](experiments/concavity/README.md).
+
 ## Acknowledgements
 
 This work was supported by the National Science Foundation through the AI-EDGE

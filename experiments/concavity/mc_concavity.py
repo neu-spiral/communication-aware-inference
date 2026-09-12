@@ -1,7 +1,7 @@
 """
 Monte-Carlo concavity estimation in eta-space + per-cut-point eta_min search.
 
-This REFRAMES the fixed-ray test in ``experiments/ray_concavity_score.py``.
+This REFRAMES the fixed-ray test in ``experiments/concavity/ray_concavity_score.py``.
 Instead of a handful of hand-designed rays we treat concavity as a Monte-Carlo
 property of the whole eta-hypercube [0,1]^n (n = number of activation
 cut-points):
@@ -31,7 +31,7 @@ Subcommands
   etamin  : model-free; re-run the eta_min search on an existing *_rays.json.
 
 Example (smoke):
-  python experiments/mc_concavity.py run \
+  python experiments/concavity/mc_concavity.py run \
       --model meta-llama/Llama-3.1-8B --dataset wikitext --metric perplexity \
       --strategy topk_per_token --n_cuts 4 --n_rays 20 --n_points 7 \
       --max_texts 16 --out_dir outputs/mc_concavity/smoke
@@ -220,7 +220,7 @@ def run_mc_phase(
     """Sample `n_rays` random rays, evaluate, classify, return ray dicts.
 
     If `checkpoint_path` is given, the partial ray list is dumped there every
-    `checkpoint_every` rays (and at the end) so a SLURM walltime kill doesn't
+    `checkpoint_every` rays (and at the end) so a walltime kill doesn't
     discard completed work.
     """
     rays: List[dict] = []

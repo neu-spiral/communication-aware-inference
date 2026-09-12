@@ -34,7 +34,7 @@ companion JSON table this script writes).
 you want the panels as separate figures rather than a grid.
 
 Usage:
-  python experiments/plot_concavity_per_method.py \
+  python experiments/concavity/plot_concavity_per_method.py \
       --root outputs/mc_concavity --out_dir outputs/mc_concavity/jensen
 """
 from __future__ import annotations

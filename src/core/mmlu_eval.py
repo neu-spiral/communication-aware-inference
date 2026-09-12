@@ -39,12 +39,12 @@ def _build_mmlu_prompt(
 def _load_mmlu_split(subject: str, split: str) -> List[Dict[str, Any]]:
     """Load one (subject, split) of cais/mmlu as a list of row dicts.
 
-    The `easy` conda env ships a datasets/fsspec combo whose `load_dataset`
-    glob resolver chokes on the hub's `**` patterns ("Invalid pattern: '**'
-    can only be an entire path component"). To stay robust we pull the parquet
-    shard directly (same approach as experiments/mc_concavity.py for ShareGPT)
-    and only fall back to `load_dataset` if that fails. Parquet row order
-    matches `load_dataset`, so downstream seeded sampling is unchanged.
+    Some datasets/fsspec combinations ship a `load_dataset` glob resolver that
+    chokes on the hub's `**` patterns ("Invalid pattern: '**' can only be an
+    entire path component"). To stay robust we pull the parquet shard directly
+    (the same approach the concavity harness uses for ShareGPT) and only fall
+    back to `load_dataset` if that fails. Parquet row order matches
+    `load_dataset`, so downstream seeded sampling is unchanged.
     """
     try:
         import pandas as pd

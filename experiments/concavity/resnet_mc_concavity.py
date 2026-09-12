@@ -76,7 +76,7 @@ def _build_backend(args):
 def cmd_enumerate(args) -> None:
     """Exhaustive quantization enumeration for the ResNet backend (5^n grid).
 
-    Mirrors experiments/enumerate_quant_concavity.py but drives
+    Mirrors experiments/concavity/enumerate_quant_concavity.py but drives
     accuracy_callable(eta) instead of an LLM evaluator, writing axis-aligned
     rays in the same schema so jensen folds the ResNet quantization curve in."""
     from enumerate_quant_concavity import build_axis_rays, _key  # reuse helpers
