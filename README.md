@@ -12,8 +12,8 @@ Given edge nodes, pipelined inference tasks, and time-varying link capacities, t
 ## Companion repositories
 
 This repository is the **offline** half of the paper: the optimizer library and
-the simulation harness. The online experiments run on real edge hardware, and
-each testbed has its own repository:
+the simulation harness. The online experiments run on real edge hardware, with
+each testbed maintained in its own repository:
 
 | Testbed | Repository | Scope |
 |---|---|---|
@@ -35,7 +35,7 @@ source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-Run scripts from the repository root so `from src...` imports resolve.
+Run all scripts from the repository root so that `from src...` imports resolve correctly.
 
 `requirements.txt` is unpinned, so `pip` installs the current PyTorch release,
 whose default wheel targets the newest CUDA. If your driver is older,
